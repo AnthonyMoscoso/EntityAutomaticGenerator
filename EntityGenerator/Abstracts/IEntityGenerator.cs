@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Text;
 
 namespace Core.Entities.Utilities.EntityGenerator.Abstracts
@@ -12,5 +13,6 @@ namespace Core.Entities.Utilities.EntityGenerator.Abstracts
         /// <param name="n">quantity of enties to generate</param>
         /// <returns>automatic list of entities</returns>
         ICollection<T> GenerateEntities(int n = 1);
+        IPropertyBuilderConfig AddRuleForParameter<TProperty>(Expression<Func<T, TProperty>> expression);
     }
 }

@@ -466,36 +466,36 @@ namespace Core.Entities.Utilities.EntityGenerator
         {
             string valueFromParameters = string.Empty;
             TextFormats textFormats = TextFormats.Mixed;
+            bool haveParameters = parameters.ContainsKey("Parameters");
             if (parameters.ContainsKey("TextFormat"))
             {
                 textFormats = (TextFormats)Enum.Parse(typeof(TextFormats), parameters["TextFormat"], true);
             }
-            if (parameters.ContainsKey("IsPhone") || parameters.ContainsKey("IsMail"))
+            if (haveParameters)
             {
-                if (parameters.ContainsKey("IsPhone"))
-                {
-                    bool isPhone = Convert.ToBoolean(parameters["IsPhone"]);
-                    if (isPhone)
-                    {
-                        valueFromParameters = GetRandomNumberPhone();
-                    }
-                }
-                else
-                {
-                    bool isPhone = Convert.ToBoolean(parameters["IsMail"]);
-                    if (isPhone)
-                    {
-                        valueFromParameters = GetRandomEmail(textFormats);
-                    }
-                }
+                string[] vs = parameters["Parameters"].Split(";");
+                valueFromParameters = GetRandomString(vs);
             }
             else
             {
-            
-                if (parameters.ContainsKey("Parameters"))
+                if (parameters.ContainsKey("IsPhone") || parameters.ContainsKey("IsMail"))
                 {
-                    string[] vs = parameters["Parameters"].Split(";");
-                    valueFromParameters = GetRandomString(vs);
+                    if (parameters.ContainsKey("IsPhone"))
+                    {
+                        bool isPhone = Convert.ToBoolean(parameters["IsPhone"]);
+                        if (isPhone)
+                        {
+                            valueFromParameters = GetRandomNumberPhone();
+                        }
+                    }
+                    else
+                    {
+                        bool IsMail = Convert.ToBoolean(parameters["IsMail"]);
+                        if (IsMail)
+                        {
+                            valueFromParameters = GetRandomEmail(textFormats);
+                        }
+                    }
                 }
                 else
                 {
@@ -507,7 +507,7 @@ namespace Core.Entities.Utilities.EntityGenerator
                         {
                             throw new Exception("MinValue can't be highert that MaxValue");
                         }
-                        valueFromParameters = GetRandomString(max, min,textFormats);
+                        valueFromParameters = GetRandomString(max, min, textFormats);
                     }
                     else if (parameters.ContainsKey("MaxLeng") && !parameters.ContainsKey("MinLeng"))
                     {
@@ -516,21 +516,23 @@ namespace Core.Entities.Utilities.EntityGenerator
                         {
                             throw new Exception("Can be max value equals 0 ");
                         }
-                        valueFromParameters = GetRandomString(max,0,textFormats);
+                        valueFromParameters = GetRandomString(max, 0, textFormats);
                     }
                     else if (!parameters.ContainsKey("MaxLeng") && parameters.ContainsKey("MinLeng"))
                     {
                         int min = Convert.ToInt32(parameters["MinLeng"]);
                         int max = min + 10;
-                        valueFromParameters = GetRandomString(max, min,textFormats);
+                        valueFromParameters = GetRandomString(max, min, textFormats);
                     }
                     else
                     {
                         valueFromParameters = GetRandomString(textFormats);
                     }
                 }
-
+              
             }
+            
+
 
             return valueFromParameters;
         }

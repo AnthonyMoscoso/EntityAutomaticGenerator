@@ -15,13 +15,13 @@ namespace Core.Entities.Utilities.EntityGenerator
         readonly ICollection<IPropertyBuilderConfig> builderConfigs;
         private readonly ICollection<T> entitiesGenerates;
         private int numEntitiesToGenerate;
-        int aux =0;
+        int aux = 0;
         int oldAux;
         public BaseGeneratorProfile()
         {
             builderConfigs = new List<IPropertyBuilderConfig>();
             _valueGenerator = new RandomValueGenerator();
-           entitiesGenerates = new List<T>();
+            entitiesGenerates = new List<T>();
         }
 
         private T GenerateEntity()
@@ -36,25 +36,22 @@ namespace Core.Entities.Utilities.EntityGenerator
                     {
 
                         IPropertyBuilderConfig searchBuilder = builderConfigs.SingleOrDefault(w => w.PropertyName.Equals(property.Name));
-                   
+
                         if (searchBuilder != null)
                         {
 
                             if (searchBuilder.Parameters.Count > 0)
                             {
                                 KeyValuePair<string, string> keyValuePair = new KeyValuePair<string, string>("IsUnique", "True");
-                                if (searchBuilder.Parameters.Contains(keyValuePair) )
+                                if (searchBuilder.Parameters.Contains(keyValuePair))
                                 {
-      
-                                        GenerateUniqueValueFromConfig(property, searchBuilder.Parameters, entity, entitiesGenerates);
-    
-                                    
+                                    GenerateUniqueValueFromConfig(property, searchBuilder.Parameters, entity, entitiesGenerates);
                                 }
                                 else
                                 {
                                     GenerateValueFromConfig(property, entity, searchBuilder.Parameters);
                                 }
-                               
+
                             }
                             else
                             {
@@ -116,6 +113,19 @@ namespace Core.Entities.Utilities.EntityGenerator
             return entityBuilderConfig;
 
         }
+
+        public IPropertyBuilderConfig AddRuleForParameter<TProperty>(Expression<Func<T, TProperty>> expression)
+        {
+            MemberExpression expressions = expression.Body as MemberExpression;
+            string name = expressions.Member.Name;
+            IPropertyBuilderConfig entityBuilderConfig = builderConfigs.SingleOrDefault(w => w.PropertyName.Equals(name));
+            if (entityBuilderConfig == null)
+            {
+                entityBuilderConfig = new PropertyBuilderConfig<TProperty>(name);
+                builderConfigs.Add(entityBuilderConfig);
+            }
+            return entityBuilderConfig;
+        }
         #region GeneraterValues
         private void GenerateValueFromConfig(PropertyInfo property, T entity, IDictionary<string, string> parameters)
         {
@@ -153,7 +163,7 @@ namespace Core.Entities.Utilities.EntityGenerator
             }
         }
 
-        private void GenerateUniqueValueFromConfig(PropertyInfo property,IDictionary<string, string> parameters,T entity,ICollection<T> entities)
+        private void GenerateUniqueValueFromConfig(PropertyInfo property, IDictionary<string, string> parameters, T entity, ICollection<T> entities)
         {
             TypeCode typeCode = Type.GetTypeCode(property.PropertyType);
             switch (typeCode)
@@ -164,10 +174,10 @@ namespace Core.Entities.Utilities.EntityGenerator
                 case TypeCode.Int16:
                 case TypeCode.Int32:
                 case TypeCode.Int64:
-                    GenerateUniqueIntKeyFromParameters(property,parameters,entity,entities);
+                    GenerateUniqueIntKeyFromParameters(property, parameters, entity, entities);
                     break;
                 case TypeCode.String:
-                    GenerateUniqueStringKeyFromParameters(property,parameters,entity,entities);
+                    GenerateUniqueStringKeyFromParameters(property, parameters, entity, entities);
                     break;
                 default:
                     throw new Exception($"Unique key not is permit for  type {property.PropertyType} in parameter {property.Name} ");
@@ -209,9 +219,9 @@ namespace Core.Entities.Utilities.EntityGenerator
         #endregion
 
 
-        private void GenerateUniqueIntKeyFromParameters(PropertyInfo property,IDictionary<string, string> parameters,T entity, ICollection<T> entities)
+        private void GenerateUniqueIntKeyFromParameters(PropertyInfo property, IDictionary<string, string> parameters, T entity, ICollection<T> entities)
         {
-     
+
             if (Type.GetTypeCode(property.PropertyType) == TypeCode.Int32)
             {
                 bool containsMaxValue = parameters.ContainsKey("MaxValue");
@@ -295,23 +305,25 @@ namespace Core.Entities.Utilities.EntityGenerator
 
         private void GenerateUniqueStringKeyFromParameters(PropertyInfo property, IDictionary<string, string> parameters, T entity, ICollection<T> entities)
         {
-            string key = GetUniqueString(property,parameters,entities);
+            string key = GetUniqueString(property, parameters, entities);
             property.SetValue(entity, key);
-            
+
         }
 
-        private string GetUniqueString(PropertyInfo property,IDictionary<string, string> parameters,ICollection<T> entities)
+        private string GetUniqueString(PropertyInfo property, IDictionary<string, string> parameters, ICollection<T> entities)
         {
             string key = _valueGenerator.GetRandomStringFromParameters(parameters);
-            foreach(T entity in entities)
+            foreach (T entity in entities)
             {
                 if (property.GetValue(entity).ToString().ToUpper().Equals(key))
                 {
-                    key = GetUniqueString(property,parameters,entities);
+                    key = GetUniqueString(property, parameters, entities);
                 }
             }
             return key;
         }
+
+
     }
 
 
